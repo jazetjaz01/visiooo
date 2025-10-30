@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { hasEnvVars } from "@/lib/utils";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
-import { NavAccueil } from "./nav-accueil"
+import { NavOpen } from "./nav-open"
 const Navbar = () => {
   return (
     <div className="h-16 ">
@@ -15,7 +15,7 @@ const Navbar = () => {
           
           <div className="flex items-center   md:gap-2  ">
             <div className="md:hidden">
-            <NavAccueil />
+            <NavOpen />
             </div>
             
 

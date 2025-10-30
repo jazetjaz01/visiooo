@@ -1,23 +1,36 @@
 "use client"
 
-import { Menu } from "lucide-react"
-import { useSidebar } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
+import { Home, PlaySquare, Users } from "lucide-react"
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 
 export function NavAccueil() {
-  const { toggleSidebar } = useSidebar()
+  const navItems = [
+    { name: "Accueil", url: "/", icon: Home },
+    { name: "Shorts", url: "/shorts", icon: PlaySquare },
+    { name: "Abonnements", url: "/abonnements", icon: Users },
+  ]
 
   return (
-    <div className="  pt-1">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleSidebar}
-        className="hover:bg-muted rounded-full"
-      >
-        <Menu className="h-6 w-6" />
-        <span className="sr-only">Toggle sidebar</span>
-      </Button>
-    </div>
+    <SidebarGroup>
+      <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+      <SidebarMenu>
+        {navItems.map((item) => (
+          <SidebarMenuItem key={item.name}>
+            <SidebarMenuButton asChild>
+              <a href={item.url} className="flex  gap-2 ">
+                <item.icon className="h-4 w-4" />
+                <span>{item.name}</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
   )
 }

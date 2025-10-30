@@ -19,6 +19,8 @@ import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 
+import { NavOpen } from "./nav-open"
+
 import { NavAccueil } from "./nav-accueil"
 
 import {
@@ -164,16 +166,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="w-full max-w-sm">
-               <NavAccueil />
+        <div className="w-full max-w-sm ">
+               <NavOpen />
               </div>
-        <TeamSwitcher teams={data.teams} />
+              
+       
       </SidebarHeader>
       <SidebarContent>
+           <NavAccueil />
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
+         <TeamSwitcher teams={data.teams} />
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />
