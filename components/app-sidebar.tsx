@@ -20,7 +20,7 @@ import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 
 import { NavOpen } from "./nav-open"
-
+import { NavDecouverte } from "./nav-decouverte"
 import { NavAccueil } from "./nav-accueil"
 
 import {
@@ -174,6 +174,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
            <NavAccueil />
+             <NavDecouverte />
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
