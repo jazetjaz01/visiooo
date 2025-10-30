@@ -7,7 +7,7 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 const Navbar = () => {
   return (
-    <div className="h-16 bg-teal-500">
+    <div className="h-16 bg-white">
       <nav className="fixed  inset-x-4 h-16 bg-background  dark:border-slate-700/70 pl-4  pr-4 mx-auto w-full ">
         
         <div className="h-full flex items-center justify-between mx-auto px-4 ">
