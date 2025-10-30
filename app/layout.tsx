@@ -49,7 +49,7 @@ export default function RootLayout({
           {/* ✅ Contenu principal */}
           <div className="flex flex-col w-full">
             {/* ✅ Navbar globale en haut */}
-        
+           <Navbar />
 
             {/* ✅ Header avec le trigger + breadcrumb */}
             <SidebarInset>
