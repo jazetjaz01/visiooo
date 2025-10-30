@@ -58,11 +58,11 @@ export function AuthButton() {
       <Button
         asChild
         variant="outline"
-        className="hidden sm:inline-flex rounded-full"
+        className=" rounded-full"
       >
         <Link href="/auth/login">Se connecter</Link>
       </Button>
-      <Button asChild className="rounded-full">
+      <Button asChild className="rounded-ful hidden sm:inline-flex">
         <Link href="/auth/sign-up">S'enregistrer</Link>
       </Button>
     </div>
