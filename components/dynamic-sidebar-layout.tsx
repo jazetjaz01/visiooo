@@ -38,7 +38,8 @@ export default function DynamicSidebarLayout({
         <Navbar />
 
         <SidebarInset>
-          <header className="flex h-16 items-center gap-2 border-b border-border bg-background/95 backdrop-blur px-4">
+        
+             {/*   <header className="flex h-16 items-center gap-2 border-b border-border bg-background/95 backdrop-blur px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="h-4" />
             <Breadcrumb>
@@ -48,7 +49,7 @@ export default function DynamicSidebarLayout({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          </header>
+          </header> */}
 
           <main className="flex-1 overflow-y-auto p-4">{children}</main>
         </SidebarInset>
