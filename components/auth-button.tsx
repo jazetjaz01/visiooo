@@ -45,7 +45,7 @@ export function AuthButton() {
             className="w-8 h-8 rounded-full object-cover border border-gray-300 hidden md:block"
           />
           <span className="font-medium hidden md:block">
-            Hey,&nbsp;{displayName}!
+            {displayName}!
           </span>
         </div>
         <LogoutButton />
