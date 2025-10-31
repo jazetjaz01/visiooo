@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Menu } from "lucide-react"
-import { useSidebar } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
+import { Menu } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 export function NavOpen() {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="  pt-1">
+    <div className="pt-1">
       <Button
         variant="ghost"
         size="icon"
@@ -19,5 +19,5 @@ export function NavOpen() {
         <span className="sr-only">Toggle sidebar</span>
       </Button>
     </div>
-  )
+  );
 }

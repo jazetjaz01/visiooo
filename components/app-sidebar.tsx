@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import Link from "next/link";
 import {
   AudioWaveform,
-  BookOpen,
   Bot,
+  BookOpen,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -12,177 +13,109 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
-
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
-
-import { NavOpen } from "./nav-open"
-import { NavDecouverte } from "./nav-decouverte"
-import { NavAccueil } from "./nav-accueil"
+} from "lucide-react";
 
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
+} from "@/components/ui/sidebar";
+import { NavUser } from "@/components/nav-user";
+import { TeamSwitcher } from "@/components/team-switcher";
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavOpen } from "./nav-open";
+import { NavAccueil } from "./nav-accueil";
+import { NavDecouverte } from "./nav-decouverte";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Données d'exemple
+  const data = {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    teams: [
+      { name: "Acme Inc", logo: GalleryVerticalEnd, plan: "Enterprise" },
+      { name: "Acme Corp.", logo: AudioWaveform, plan: "Startup" },
+      { name: "Evil Corp.", logo: Command, plan: "Free" },
+    ],
+    navMain: [
+      {
+        title: "Playground",
+        url: "#",
+        icon: SquareTerminal,
+        isActive: true,
+        items: [
+          { title: "History", url: "#" },
+          { title: "Starred", url: "#" },
+          { title: "Settings", url: "#" },
+        ],
+      },
+      {
+        title: "Models",
+        url: "#",
+        icon: Bot,
+        items: [
+          { title: "Genesis", url: "#" },
+          { title: "Explorer", url: "#" },
+          { title: "Quantum", url: "#" },
+        ],
+      },
+      {
+        title: "Documentation",
+        url: "#",
+        icon: BookOpen,
+        items: [
+          { title: "Introduction", url: "#" },
+          { title: "Get Started", url: "#" },
+          { title: "Tutorials", url: "#" },
+          { title: "Changelog", url: "#" },
+        ],
+      },
+      {
+        title: "Settings",
+        url: "#",
+        icon: Settings2,
+        items: [
+          { title: "General", url: "#" },
+          { title: "Team", url: "#" },
+          { title: "Billing", url: "#" },
+          { title: "Limits", url: "#" },
+        ],
+      },
+    ],
+    projects: [
+      { name: "Design Engineering", url: "#", icon: Frame },
+      { name: "Sales & Marketing", url: "#", icon: PieChart },
+      { name: "Travel", url: "#", icon: Map },
+    ],
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <div className="w-full max-w-sm ">
-               <NavOpen />
-              </div>
-              
-       
+        <div className="w-full max-w-sm">
+          <NavOpen />
+        </div>
       </SidebarHeader>
+
       <SidebarContent>
-           <NavAccueil />
-             <NavDecouverte />
+        <NavAccueil />
+        <NavDecouverte />
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
+
       <SidebarFooter>
-         <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={data.teams} />
         <NavUser user={data.user} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

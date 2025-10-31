@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, PlaySquare, Users } from "lucide-react"
+import { Home, PlaySquare, Users, ListVideo } from "lucide-react"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -13,7 +13,8 @@ export function NavAccueil() {
   const navItems = [
     { name: "Accueil", url: "/", icon: Home },
     { name: "Shorts", url: "/shorts", icon: PlaySquare },
-    { name: "Abonnements", url: "/abonnements", icon: Users },
+    { name: "Abonnements", url: "/abonnements", icon: ListVideo },
+    { name: "Mon compte", url: "/account", icon: Users },
   ]
 
   return (
@@ -23,7 +24,7 @@ export function NavAccueil() {
         {navItems.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url} className="flex  gap-2 ">
+              <a href={item.url} className="flex items-center gap-2 ">
                 <item.icon className="h-4 w-4" />
                 <span>{item.name}</span>
               </a>
