@@ -30,10 +30,8 @@ export function AuthButton() {
   }, [supabase]);
 
   if (user) {
-    const avatarUrl =
-      user.user_metadata?.avatar_url || "/default-avatar.png";
-    const displayName =
-      user.user_metadata?.full_name || user.email;
+    const avatarUrl = user.user_metadata?.avatar_url || "/default-avatar.png";
+    const displayName = user.user_metadata?.full_name || user.email;
 
     return (
       <div className="flex items-center gap-4">
@@ -44,9 +42,12 @@ export function AuthButton() {
             alt="User avatar"
             className="w-8 h-8 rounded-full object-cover border border-gray-300 hidden md:block"
           />
-          <span className="font-medium hidden md:block">
-            {displayName}!
-          </span>
+          <Link
+            href="/account"
+            className="hidden md:block  hover:underline text-sm font-semibold "
+          >
+            {displayName}
+          </Link>
         </div>
         <LogoutButton />
       </div>
@@ -55,11 +56,7 @@ export function AuthButton() {
 
   return (
     <div className="flex gap-2">
-      <Button
-        asChild
-        variant="outline"
-        className=" rounded-full"
-      >
+      <Button asChild variant="outline" className="rounded-full">
         <Link href="/auth/login">Se connecter</Link>
       </Button>
       <Button asChild className="rounded-ful hidden sm:inline-flex">

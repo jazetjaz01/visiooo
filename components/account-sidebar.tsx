@@ -31,7 +31,7 @@ export function AccountSidebar() {
   const { isMobile } = useSidebar();
 
   const accountLinks = [
-    { name: "Profil", url: "/account/profile", icon: User },
+    { name: "Profil", url: "/account", icon: User },
     { name: "Paramètres", url: "/account/settings", icon: Settings },
   ];
 
