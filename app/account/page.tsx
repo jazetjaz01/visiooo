@@ -19,12 +19,11 @@ export default async function AccountProfilePage() {
     user.user_metadata?.preferred_username ||
     user.email?.split("@")[0];
   const email = user.email;
-  const is_verified = user.user_metadata?.email_verified ?? false;
   const bio = user.user_metadata?.bio || "Aucune bio renseignée pour le moment.";
 
   return (
-    <div className="flex justify-center py-8 px-4 bg-muted/30 min-h-screen">
-      <div className="w-full max-w-3xl bg-background rounded-2xl shadow-md overflow-hidden">
+    <div className="flex justify-center py-8 px-4 min-h-screen">
+      <div className="w-full max-w-3xl bg-background rounded-2xl overflow-hidden">
         {/* 🖼️ Bannière */}
         <div className="relative h-48 w-full bg-muted overflow-hidden rounded-2xl">
           <Image
@@ -36,7 +35,7 @@ export default async function AccountProfilePage() {
         </div>
 
         {/* 👤 Avatar avec nom et username sous l'image */}
-        <div className="relative px-6 -mt-16 flex flex-col  gap-2 z-10">
+        <div className="relative px-6 -mt-16 flex flex-col gap-2 z-10 ">
           {/* Avatar */}
           <div className="relative w-24 h-24 rounded-full border-4 border-background overflow-hidden shadow-md">
             <Image
@@ -48,12 +47,7 @@ export default async function AccountProfilePage() {
           </div>
 
           {/* Nom / username / email sous l’avatar */}
-          <h1 className="text-2xl font-semibold flex items-center gap-2 ">
-            {full_name}
-            {is_verified && (
-              <span className="text-green-500 text-sm">✔ Vérifié</span>
-            )}
-          </h1>
+          <h1 className="text-2xl font-semibold">{full_name}</h1>
           <p className="text-sm text-muted-foreground">@{username}</p>
           <p className="text-sm text-muted-foreground">{email}</p>
         </div>
