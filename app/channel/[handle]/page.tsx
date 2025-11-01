@@ -85,7 +85,7 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white">
+    <div className="min-h-screen  dark:bg-black text-black dark:text-white">
       {/* Bannière */}
       <div className="relative w-full h-48 sm:h-64 bg-zinc-200 dark:bg-zinc-800">
         {channel.banner_url ? (
