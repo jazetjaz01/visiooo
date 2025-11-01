@@ -10,7 +10,7 @@ interface Video {
   description: string | null;
   video_url: string;
   thumbnail_url: string | null;
-  category: string[] | null | string;
+  category: string[];
   views_count: number;
   created_at: string;
 }
@@ -37,10 +37,14 @@ export default function WatchPage() {
         return;
       }
 
+      // 🔹 Normalisation du champ category
       const parsedVideo: Video = {
         ...data,
-        category:
-          typeof data.category === "string" ? JSON.parse(data.category) : data.category,
+        category: Array.isArray(data.category)
+          ? data.category
+          : typeof data.category === "string"
+          ? JSON.parse(data.category)
+          : [],
       };
 
       setVideo(parsedVideo);
@@ -83,7 +87,7 @@ export default function WatchPage() {
         </h1>
 
         {/* Catégories */}
-        {video.category && video.category.length > 0 && (
+        {video.category.length > 0 && (
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Catégorie : {video.category.join(", ")}
           </p>
@@ -96,7 +100,7 @@ export default function WatchPage() {
 
         {/* Description */}
         {video.description && (
-          <p className="mt-2 text-gray-800 dark:text-gray-200">
+          <p className="mt-2 text-gray-800 dark:text-gray-200 leading-relaxed">
             {video.description}
           </p>
         )}
