@@ -21,7 +21,7 @@ import {
 export function NavStudio() {
   const items = [
     { name: "Tableau de bord", url: "/account/upload", icon: LayoutDashboard },
-     { name: "Chaines", url: "/account/create-channel", icon: BarChart2 },
+     { name: "Chaines", url: "/account/channel", icon: BarChart2 },
     { name: "Videos", url: "/studio/contenus", icon: FileText },
   
     { name: "Communautés", url: "/studio/communautes", icon: Users },
