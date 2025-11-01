@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "your-project-id.supabase.co", // ✅ ton bucket Supabase (remplace ton domaine)
+        hostname: "ssnekjesmkcnmfjcnlph.supabase.co", // ✅ ton bucket Supabase (remplace ton domaine)
       },
     ],
   },

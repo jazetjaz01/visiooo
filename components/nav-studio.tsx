@@ -20,7 +20,7 @@ import {
 
 export function NavStudio() {
   const items = [
-    { name: "Tableau de bord", url: "/studio/dashboard", icon: LayoutDashboard },
+    { name: "Tableau de bord", url: "/account/upload", icon: LayoutDashboard },
     { name: "Contenus", url: "/studio/contenus", icon: FileText },
     { name: "Données analytiques", url: "/studio/analytiques", icon: BarChart2 },
     { name: "Communautés", url: "/studio/communautes", icon: Users },
