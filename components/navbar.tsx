@@ -7,7 +7,7 @@ import { hasEnvVars } from "@/lib/utils";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { NavOpen } from "./nav-open";
-
+import { CreateMenu } from "./CreateMenu";
 const Navbar = () => {
   return (
     <div className="h-16">
@@ -42,8 +42,12 @@ const Navbar = () => {
               <Search className="h-4 w-4" />
             </Button>
           </div>
+<div className="hidden md:block"><CreateMenu /></div>
+
+
 
           <div className="flex items-center gap-2">
+             
             {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
           </div>
 

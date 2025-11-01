@@ -187,7 +187,7 @@ export default function UploadPage() {
     <div className="flex justify-center px-4 py-12">
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Uploader une nouvelle vidéo samedi</CardTitle>
+          <CardTitle className="text-xl font-semibold">Uploader une nouvelle vidéo</CardTitle>
         </CardHeader>
 
         <CardContent>
