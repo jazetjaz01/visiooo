@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-black dark:text-white">Mes videos ici</h1>
+      <h1 className="text-3xl font-bold mb-8 text-black dark:text-white">Mes videos ici samedi</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {videos.map((video) => (
