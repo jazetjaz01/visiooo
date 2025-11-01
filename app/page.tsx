@@ -104,7 +104,14 @@ export default function Home() {
               )}
 
               <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 gap-2 mt-1">
-                {video.category && <span>{video.category.join(", ")}</span>}
+               {video.category && (
+  <span>
+    {Array.isArray(video.category)
+      ? video.category.join(", ")
+      : video.category}
+  </span>
+)}
+
                 <span>{video.views_count} vues</span>
               </div>
             </div>
