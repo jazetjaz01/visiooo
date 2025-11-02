@@ -9,8 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useActiveProfile, Profile } from "./ActiveProfilContext";
-import { Logo } from "./logo";
+import { useActiveProfile } from "./ActiveProfilContext";
+
 
 export function AuthButton() {
   const [user, setUser] = useState<any>(null);
