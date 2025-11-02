@@ -17,9 +17,20 @@ import {
   SidebarMenuAction,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function NavAccount() {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+  const supabase = createClient();
+
+  // ✅ Fonction de déconnexion
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+    router.refresh();
+  };
 
   const accountLinks = [
     { name: "Profil", url: "/account", icon: User },
@@ -31,17 +42,19 @@ export function NavAccount() {
       <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
         Mon compte
       </SidebarGroupLabel>
+
       <SidebarMenu>
         {accountLinks.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a className="flex items-center gap-2" href={item.url}>
                 <item.icon />
-                <span className="group-data-[collapsible=icon]:hidden">{item.name}</span>
+                <span className="group-data-[collapsible=icon]:hidden">
+                  {item.name}
+                </span>
               </a>
             </SidebarMenuButton>
 
-            {/* Dropdown optionnel */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
@@ -54,28 +67,24 @@ export function NavAccount() {
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
-                  <span>Voir</span>
-                </DropdownMenuItem>
+                <DropdownMenuItem>Voir</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <span>Partager</span>
-                </DropdownMenuItem>
+                <DropdownMenuItem>Partager</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
 
-        {/* Déconnexion */}
+        {/* 🔥 Déconnexion (texte cliquable, sans bouton) */}
         <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <a
-              className="flex items-center gap-2 text-destructive"
-              href="/logout"
-            >
-              <LogOut />
-              <span className="group-data-[collapsible=icon]:hidden">Déconnexion</span>
-            </a>
+          <SidebarMenuButton
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-destructive cursor-pointer hover:bg-destructive/10"
+          >
+            <LogOut />
+            <span className="group-data-[collapsible=icon]:hidden">
+              Déconnexion
+            </span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

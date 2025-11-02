@@ -122,7 +122,7 @@ export default function WatchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white">
+    <div className="min-h-screen  dark:bg-black text-black dark:text-white">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Vidéo principale */}
         <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">

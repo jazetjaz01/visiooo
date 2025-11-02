@@ -49,7 +49,7 @@ export function AuthButton() {
             {displayName}
           </Link>
         </div>
-        <LogoutButton />
+       {/* <LogoutButton /> */}
       </div>
     );
   }
