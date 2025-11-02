@@ -16,31 +16,50 @@ export function AccountSidebar() {
   const { open, setOpen } = useSidebar();
   const [initialOpen, setInitialOpen] = useState<boolean | null>(null);
 
-  // Lire localStorage *avant* d'afficher quoi que ce soit
+  // 🔹 Lecture initiale de localStorage au montage
   useEffect(() => {
-    const saved = localStorage.getItem("accountSidebarOpen");
-    if (saved === null) {
-      // Pas encore de valeur : on ouvre par défaut
+    try {
+      const saved = localStorage.getItem("accountSidebarOpen");
+      if (saved === null) {
+        // Première visite → on ouvre par défaut
+        setInitialOpen(true);
+        setOpen(true);
+        localStorage.setItem("accountSidebarOpen", "true");
+      } else {
+        const shouldBeOpen = saved === "true";
+        setInitialOpen(shouldBeOpen);
+        setOpen(shouldBeOpen);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la lecture de localStorage :", error);
       setInitialOpen(true);
-      localStorage.setItem("accountSidebarOpen", "true");
       setOpen(true);
-    } else {
-      const shouldBeOpen = saved === "true";
-      setInitialOpen(shouldBeOpen);
-      setOpen(shouldBeOpen);
     }
-  }, [setOpen]);
+  }, []); // ✅ exécution unique
 
-  // Sauvegarder les changements
+  // 🔹 Sauvegarder les changements locaux dans localStorage
   useEffect(() => {
     if (initialOpen !== null) {
       localStorage.setItem("accountSidebarOpen", open.toString());
     }
   }, [open, initialOpen]);
 
-  // Empêcher le rendu tant que la valeur initiale n’est pas connue
+  // 🔹 Synchroniser entre onglets (écoute des changements de localStorage)
+  useEffect(() => {
+    function handleStorageChange(event: StorageEvent) {
+      if (event.key === "accountSidebarOpen" && event.newValue !== null) {
+        const newState = event.newValue === "true";
+        setOpen(newState);
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [setOpen]);
+
+  // 🔹 Empêcher le rendu tant que la valeur initiale n’est pas connue
   if (initialOpen === null) {
-    return null; // évite le “clignotement”
+    return null; // évite le clignotement
   }
 
   return (
