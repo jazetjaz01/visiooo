@@ -2,66 +2,195 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "./ui/button";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LogoutButton } from "./logout-button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { useActiveProfile } from "./ActiveProfilContext";
+import { Logo } from "./logo";
 
 export function AuthButton() {
   const [user, setUser] = useState<any>(null);
+  const [channels, setChannels] = useState<any[]>([]);
   const supabase = createClient();
+  const { profile, setProfile } = useActiveProfile();
 
+  // Charger l’utilisateur et ses chaînes
   useEffect(() => {
-    // Vérifie l'état initial
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data?.user);
+    const loadUserAndChannels = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUser(data.user);
+        await fetchChannels(data.user.id, data.user);
+      }
+    };
+
+    loadUserAndChannels();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchChannels(session.user.id, session.user);
     });
 
-    // Écoute les changements d'auth
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    // Nettoyage
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener.subscription.unsubscribe();
   }, [supabase]);
 
-  if (user) {
-    const avatarUrl = user.user_metadata?.avatar_url || "/default-avatar.png";
-    const displayName = user.user_metadata?.full_name || user.email;
+  const fetchChannels = async (userId: string, userData: any) => {
+    const { data: channelData } = await supabase
+      .from("channels")
+      .select("*")
+      .eq("user_id", userId);
 
+    setChannels(channelData || []);
+
+    // Profil actif par défaut : utilisateur
+    setProfile({
+      type: "user",
+      id: userId,
+      name: userData.user_metadata?.full_name || userData.email,
+      avatar_url: userData.user_metadata?.avatar_url || "/default-avatar.png",
+    });
+  };
+
+  if (user) {
     return (
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          {/* 🔹 Affiche la photo Google */}
-          <img
-            src={avatarUrl}
-            alt="User avatar"
-            className="w-8 h-8 rounded-full object-cover border border-gray-300 hidden md:block"
-          />
-          <Link
-            href="/account"
-            className="hidden md:block  hover:underline text-sm font-semibold "
-          >
-            {displayName}
-          </Link>
-        </div>
-       {/* <LogoutButton /> */}
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex items-center gap-2 rounded-full border border-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-zinc-800">
+            <Image
+              src={profile?.avatar_url || "/default-avatar.png"}
+              alt={profile?.name || "Profil"}
+              width={32}
+              height={32}
+              className="rounded-full object-cover"
+            />
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent className="w-64">
+
+          {/* -------- Bloc 1 : Profil actif -------- */}
+          <div className="px-2 py-2">
+            <span className="text-xs text-gray-500">Profil actif</span>
+            <Link
+              href={
+                profile?.type === "channel"
+                  ? `/channel/${profile?.handle}`
+                  : `/account`
+              }
+              className="mt-1 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-800 px-2 py-1 rounded"
+            >
+              <Image
+                src={profile?.avatar_url || "/default-avatar.png"}
+                alt={profile?.name || "Profil"}
+                width={32}
+                height={32}
+                className="rounded-full object-cover"
+              />
+              <span className="font-medium flex items-center gap-1">
+                {profile?.name || "Profil"}
+                <span className="w-2 h-2 bg-teal-500 rounded-full" title="Actif"></span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-zinc-700 mt-2"></div>
+
+          {/* -------- Bloc 2 : Changer de compte -------- */}
+          <div className="px-2 py-2">
+            <span className="text-xs text-gray-500">Changer de compte</span>
+
+            {/* Compte utilisateur */}
+            <DropdownMenuItem
+              onSelect={() =>
+                setProfile({
+                  type: "user",
+                  id: user.id,
+                  name: user.user_metadata?.full_name || user.email,
+                  avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
+                })
+              }
+            >
+              <div className="flex items-center gap-2">
+                <Image
+                  src={user.user_metadata?.avatar_url || "/default-avatar.png"}
+                  alt="Utilisateur"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+                <span>{user.user_metadata?.full_name || user.email}</span>
+              </div>
+            </DropdownMenuItem>
+
+            {/* Chaînes */}
+            {channels.map((channel) => (
+              <DropdownMenuItem
+                key={channel.id + "-switch"}
+                onSelect={() =>
+                  setProfile({
+                    type: "channel",
+                    id: channel.id,
+                    name: channel.name,
+                    avatar_url: channel.avatar_url,
+                    handle: channel.handle,
+                  })
+                }
+              >
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={channel.avatar_url || "/default-avatar.png"}
+                    alt={channel.name}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                  <span>{channel.name}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-zinc-700 mt-2"></div>
+
+          {/* -------- Bloc 3 : Déconnexion -------- */}
+          <DropdownMenuItem asChild>
+            <Link
+              href="/auth/login"
+              className="flex items-center gap-2 text-black px-2 py-2 pl-6"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                setProfile(null);
+              }}
+            >
+              <Logo className="w-4 h-4" />
+              <span>Déconnexion</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
+  // Pas connecté
   return (
     <div className="flex gap-2">
-      <Button asChild variant="outline" className="rounded-full">
-        <Link href="/auth/login">Se connecter</Link>
-      </Button>
-      <Button asChild className="rounded-ful hidden sm:inline-flex">
-        <Link href="/auth/sign-up">S'enregistrer</Link>
-      </Button>
+      <Link
+        href="/auth/login"
+        className="rounded-full border px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+      >
+        Se connecter
+      </Link>
+      <Link
+        href="/auth/sign-up"
+        className="rounded-full border px-3 py-1 text-sm hidden sm:inline-flex hover:bg-gray-100 dark:hover:bg-zinc-800"
+      >
+        S'enregistrer
+      </Link>
     </div>
   );
 }
