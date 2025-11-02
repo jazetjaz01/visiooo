@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,13 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useActiveProfile } from "./ActiveProfilContext";
 
-
 export function AuthButton() {
   const [user, setUser] = useState<any>(null);
   const [channels, setChannels] = useState<any[]>([]);
   const supabase = createClient();
   const { profile, setProfile } = useActiveProfile();
 
+  // Charger utilisateur et ses chaînes
   useEffect(() => {
     const loadUserAndChannels = async () => {
       const { data } = await supabase.auth.getUser();
@@ -45,6 +47,7 @@ export function AuthButton() {
 
     setChannels(channelData || []);
 
+    // Profil actif par défaut : utilisateur
     setProfile({
       type: "user",
       id: userId,
@@ -55,7 +58,7 @@ export function AuthButton() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // Au lieu de setProfile(null), on peut réinitialiser sur le profil utilisateur de base
+    // Réinitialiser le profil actif sur l'utilisateur de base
     if (user) {
       setProfile({
         type: "user",
@@ -64,6 +67,8 @@ export function AuthButton() {
         avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
       });
     }
+    // Rafraîchir la page pour forcer le logout
+    window.location.reload();
   };
 
   if (user) {
@@ -83,43 +88,49 @@ export function AuthButton() {
 
         <DropdownMenuContent className="w-64">
 
-          {/* Profil actif */}
+          {/* -------- Bloc 1 : Profil actif -------- */}
           <div className="px-2 py-2">
             <span className="text-xs text-gray-500">Profil actif</span>
-            <Link
-              href={profile?.type === "channel" ? `/channel/${profile.handle}` : `/account`}
-              className="mt-1 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-800 px-2 py-1 rounded"
-            >
-              <Image
-                src={profile?.avatar_url || "/default-avatar.png"}
-                alt={profile?.name || "Profil"}
-                width={32}
-                height={32}
-                className="rounded-full object-cover"
-              />
-              <span className="font-medium flex items-center gap-1">
-                {profile?.name || "Profil"}
-                <span className="w-2 h-2 bg-teal-500 rounded-full" title="Actif"></span>
-              </span>
-            </Link>
+            <DropdownMenuItem asChild>
+              <Link
+                href={profile?.type === "channel" ? `/channel/${profile.handle}` : `/account`}
+                className="mt-1 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-800 px-2 py-1 rounded"
+              >
+                <Image
+                  src={profile?.avatar_url || "/default-avatar.png"}
+                  alt={profile?.name || "Profil"}
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+                <span className="font-medium flex items-center gap-1">
+                  {profile?.name || "Profil"}
+                  <span className="w-2 h-2 bg-teal-500 rounded-full" title="Actif"></span>
+                </span>
+              </Link>
+            </DropdownMenuItem>
           </div>
 
           <div className="border-t border-gray-200 dark:border-zinc-700 mt-2"></div>
 
-          {/* Changer de compte */}
+          {/* -------- Bloc 2 : Changer de compte -------- */}
           <div className="px-2 py-2">
             <span className="text-xs text-gray-500">Changer de compte</span>
-            <DropdownMenuItem
-              onSelect={() =>
-                setProfile({
-                  type: "user",
-                  id: user.id,
-                  name: user.user_metadata?.full_name || user.email,
-                  avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
-                })
-              }
-            >
-              <div className="flex items-center gap-2">
+
+            {/* Compte utilisateur */}
+            <DropdownMenuItem asChild>
+              <Link
+                href="/account"
+                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
+                onClick={() =>
+                  setProfile({
+                    type: "user",
+                    id: user.id,
+                    name: user.user_metadata?.full_name || user.email,
+                    avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
+                  })
+                }
+              >
                 <Image
                   src={user.user_metadata?.avatar_url || "/default-avatar.png"}
                   alt="Utilisateur"
@@ -128,23 +139,25 @@ export function AuthButton() {
                   className="rounded-full object-cover"
                 />
                 <span>{user.user_metadata?.full_name || user.email}</span>
-              </div>
+              </Link>
             </DropdownMenuItem>
 
+            {/* Chaînes */}
             {channels.map((channel) => (
-              <DropdownMenuItem
-                key={channel.id + "-switch"}
-                onSelect={() =>
-                  setProfile({
-                    type: "channel",
-                    id: channel.id,
-                    name: channel.name,
-                    avatar_url: channel.avatar_url,
-                    handle: channel.handle,
-                  })
-                }
-              >
-                <div className="flex items-center gap-2">
+              <DropdownMenuItem key={channel.id + "-switch"} asChild>
+                <Link
+                  href={`/channel/${channel.handle}`}
+                  className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
+                  onClick={() =>
+                    setProfile({
+                      type: "channel",
+                      id: channel.id,
+                      name: channel.name,
+                      avatar_url: channel.avatar_url,
+                      handle: channel.handle,
+                    })
+                  }
+                >
                   <Image
                     src={channel.avatar_url || "/default-avatar.png"}
                     alt={channel.name}
@@ -153,21 +166,20 @@ export function AuthButton() {
                     className="rounded-full object-cover"
                   />
                   <span>{channel.name}</span>
-                </div>
+                </Link>
               </DropdownMenuItem>
             ))}
           </div>
 
           <div className="border-t border-gray-200 dark:border-zinc-700 mt-2"></div>
 
-          {/* Déconnexion */}
+          {/* -------- Bloc 3 : Déconnexion -------- */}
           <DropdownMenuItem asChild>
             <button
               onClick={handleLogout}
               className="flex items-center gap-4 text-black px-2 py-2 w-full pl-6"
             >
-              {/* Si profile existe on utilise Logo sinon icône LogOut */}
-              <LogOut className="w-4 h-4 " />
+              <LogOut className="w-4 h-4" />
               <span>Déconnexion</span>
             </button>
           </DropdownMenuItem>
@@ -176,13 +188,14 @@ export function AuthButton() {
     );
   }
 
+  // Pas connecté
   return (
     <div className="flex gap-2">
       <Link
         href="/auth/login"
         className="rounded-full border px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
       >
-        Connection
+        Se connecter
       </Link>
       <Link
         href="/auth/sign-up"
