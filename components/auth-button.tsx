@@ -182,7 +182,7 @@ export function AuthButton() {
         href="/auth/login"
         className="rounded-full border px-3 py-1 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
       >
-        Se connecter
+        Connection
       </Link>
       <Link
         href="/auth/sign-up"
