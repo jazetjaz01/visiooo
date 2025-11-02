@@ -21,7 +21,6 @@ interface Video {
   thumbnail_url: string | null;
   video_url: string;
   views_count: number;
-  created_at: string;
 }
 
 export default function ChannelPage() {
@@ -33,16 +32,21 @@ export default function ChannelPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fonction utilitaire pour formater les vues en k / M
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) return (views / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (views >= 1_000) return (views / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+    return views.toString();
+  };
+
   useEffect(() => {
     async function fetchChannel() {
       if (!rawHandle) return;
 
-      const handleToQuery = rawHandle; // plus de @
-
       const { data: channelData, error: channelError } = await supabase
         .from("channels")
         .select("*")
-        .eq("handle", handleToQuery)
+        .eq("handle", rawHandle)
         .single();
 
       if (channelError || !channelData) {
@@ -55,7 +59,7 @@ export default function ChannelPage() {
 
       const { data: videosData, error: videosError } = await supabase
         .from("videos")
-        .select("id, title, thumbnail_url, video_url, views_count, created_at")
+        .select("id, title, thumbnail_url, video_url, views_count")
         .eq("channel_id", channelData.id)
         .order("created_at", { ascending: false });
 
@@ -85,7 +89,7 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="min-h-screen  dark:bg-black text-black dark:text-white">
+    <div className="min-h-screen dark:bg-black text-black dark:text-white">
       {/* Bannière */}
       <div className="relative w-full h-48 sm:h-64 bg-zinc-200 dark:bg-zinc-800">
         {channel.banner_url ? (
@@ -130,7 +134,7 @@ export default function ChannelPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {videos.map((video) => (
                 <a key={video.id} href={`/watch/${video.id}`} className="flex flex-col gap-2 group">
-                  <div className="relative w-full h-44 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden">
+                  <div className="relative w-full h-60 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden">
                     {video.thumbnail_url ? (
                       <Image
                         src={video.thumbnail_url}
@@ -147,7 +151,7 @@ export default function ChannelPage() {
                   <div>
                     <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {video.views_count} vues • {new Date(video.created_at).toLocaleDateString()}
+                      {formatViews(video.views_count)} vues
                     </p>
                   </div>
                 </a>

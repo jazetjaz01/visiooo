@@ -21,7 +21,7 @@ interface Video {
   views_count: number;
   created_at: string;
   channel_id: string | null;
-  channel?: Channel | null; // 👈 Ajout du lien avec la chaîne
+  channel?: Channel | null;
 }
 
 export default function Home() {
@@ -29,9 +29,19 @@ export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fonction utilitaire pour formater les vues en k / M
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) {
+      return (views / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    }
+    if (views >= 1_000) {
+      return (views / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+    }
+    return views.toString();
+  };
+
   useEffect(() => {
     async function fetchVideosWithChannels() {
-      // 1️⃣ Récupère toutes les vidéos
       const { data: videosData, error: videosError } = await supabase
         .from("videos")
         .select("*")
@@ -39,26 +49,21 @@ export default function Home() {
         .limit(20);
 
       if (videosError || !videosData) {
-        console.error("Erreur lors du chargement des vidéos :", videosError);
+        console.error("Erreur chargement vidéos :", videosError);
         setLoading(false);
         return;
       }
 
-      // 2️⃣ Pour chaque vidéo, récupère la chaîne associée
+      // Enrichir chaque vidéo avec sa chaîne
       const enrichedVideos: Video[] = await Promise.all(
         videosData.map(async (video) => {
           if (!video.channel_id) return video;
 
-          const { data: channelData, error: channelError } = await supabase
+          const { data: channelData } = await supabase
             .from("channels")
             .select("id, name, handle, avatar_url")
             .eq("id", video.channel_id)
             .single();
-
-          if (channelError) {
-            console.warn("Erreur récupération chaîne :", channelError);
-            return video;
-          }
 
           return { ...video, channel: channelData };
         })
@@ -93,49 +98,37 @@ export default function Home() {
         Vidéos récentes
       </h1>
 
-      {/* Grille de vidéos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {videos.map((video) => (
-          <div
-            key={video.id}
-            className="flex flex-col gap-2 hover:scale-[1.02] transition-transform duration-200"
-          >
-            {/* Miniature */}
-            <div className="relative w-full h-48 bg-zinc-200 dark:bg-zinc-800 rounded-xl overflow-hidden">
-              <Link href={`/watch/${video.id}`}>
-                {video.thumbnail_url ? (
-                  <Image
-                    src={video.thumbnail_url}
-                    alt={video.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                    Pas de miniature
-                  </div>
-                )}
-              </Link>
-            </div>
+          <div key={video.id} className="flex flex-col">
+            {/* Miniature avec hover */}
+            <Link
+              href={`/watch/${video.id}`}
+              className="group relative w-full aspect-video bg-zinc-200 dark:bg-zinc-800 rounded-xl overflow-hidden"
+            >
+              {video.thumbnail_url ? (
+                <Image
+                  src={video.thumbnail_url}
+                  alt={video.title}
+                  fill
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                  Pas de miniature
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            </Link>
 
-            {/* Infos vidéo */}
-            <div className="flex flex-col gap-1">
-              <Link
-                href={`/watch/${video.id}`}
-                className="text-sm font-semibold text-black dark:text-white line-clamp-2"
-              >
-                {video.title}
-              </Link>
-
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                {video.views_count} vues •{" "}
-                {new Date(video.created_at).toLocaleDateString()}
-              </p>
-
-              {/* Détails de la chaîne */}
+            {/* Infos principales */}
+            <div className="flex mt-3 gap-3">
               {video.channel && (
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-700">
+                <Link
+                  href={`/channel/${video.channel.handle.replace("@", "")}`}
+                  className="flex-shrink-0"
+                >
+                  <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700">
                     {video.channel.avatar_url ? (
                       <Image
                         src={video.channel.avatar_url}
@@ -149,17 +142,33 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-
-                  <div className="flex flex-col">
-                    <Link
-                      href={`/channel/${video.channel.handle.replace("@", "")}`}
-                      className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:underline"
-                    >
-                      {video.channel.name}
-                    </Link>
-                  </div>
-                </div>
+                </Link>
               )}
+
+              <div className="flex flex-col">
+                {/* Titre vidéo */}
+                <Link
+                  href={`/watch/${video.id}`}
+                  className="font-semibold text-xl text-black dark:text-white line-clamp-2 hover:text-teal-600 transition-colors"
+                >
+                  {video.title}
+                </Link>
+
+                {/* Nom de la chaîne */}
+                {video.channel && (
+                  <Link
+                    href={`/channel/${video.channel.handle.replace("@", "")}`}
+                    className="text-base text-gray-600 dark:text-gray-400 mt-1 hover:underline"
+                  >
+                    {video.channel.name}
+                  </Link>
+                )}
+
+                {/* Compteur de vues formaté */}
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatViews(video.views_count)} vues
+                </p>
+              </div>
             </div>
           </div>
         ))}

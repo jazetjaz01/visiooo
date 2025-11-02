@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 interface Channel {
   id: string;
@@ -15,93 +16,192 @@ interface Channel {
   subscribers_count: number;
 }
 
-export default function ChannelListPage() {
+interface Video {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  video_url: string;
+  views_count: number;
+  channel_id: string | null;
+  channel?: Channel | null;
+}
+
+export default function ChannelPage() {
   const supabase = createClient();
-  const router = useRouter();
-  const [channels, setChannels] = useState<Channel[]>([]);
+  const params = useParams();
+  const rawHandle = params?.handle as string;
+
+  const [channel, setChannel] = useState<Channel | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchChannels() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  // Formater les vues en k/M
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) return (views / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (views >= 1_000) return (views / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+    return views.toString();
+  };
 
-      if (!user) {
-        alert("Veuillez vous connecter pour voir vos chaînes.");
+  useEffect(() => {
+    async function fetchChannelAndVideos() {
+      if (!rawHandle) return;
+
+      const { data: channelData, error: channelError } = await supabase
+        .from("channels")
+        .select("*")
+        .eq("handle", rawHandle)
+        .single();
+
+      if (channelError || !channelData) {
+        console.error("Erreur chargement chaîne :", channelError);
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from("channels")
+      setChannel(channelData);
+
+      const { data: videosData, error: videosError } = await supabase
+        .from("videos")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("channel_id", channelData.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Erreur récupération chaînes :", error);
+      if (videosError) {
+        console.error("Erreur chargement vidéos :", videosError);
       } else {
-        setChannels(data || []);
+        const enrichedVideos = videosData.map((video) => ({ ...video, channel: channelData }));
+        setVideos(enrichedVideos);
       }
 
       setLoading(false);
     }
 
-    fetchChannels();
-  }, []);
+    fetchChannelAndVideos();
+  }, [rawHandle, supabase]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600 dark:text-gray-400">
-        Chargement des chaînes...
+        Chargement de la chaîne...
       </div>
     );
   }
 
-  if (channels.length === 0) {
+  if (!channel) {
     return (
       <div className="flex min-h-screen items-center justify-center text-gray-600 dark:text-gray-400">
-        Vous n'avez pas encore créé de chaîne.
+        Chaîne introuvable.
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center  dark:bg-black min-h-screen p-6">
-      <div className="w-full max-w-5xl">
-        <h1 className="text-2xl font-bold mb-6 text-center">Mes chaînes</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {channels.map((channel) => (
-            <div
-              key={channel.id}
-              className="flex flex-col items-start gap-2 cursor-pointer hover:shadow-md p-4 rounded-lg bg-white dark:bg-zinc-800 transition"
-              onClick={() => router.push(`/account/channel/${channel.handle}`)}
-            >
-              <div className="relative w-20 h-20 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-700">
-                {channel.avatar_url ? (
-                  <Image
-                    src={channel.avatar_url}
-                    alt={channel.name}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-zinc-700 text-white text-xl">
-                    {channel.name[0]}
-                  </div>
-                )}
-              </div>
-              <h2 className="text-lg font-semibold">{channel.name}</h2>
-              {channel.description && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                  {channel.description}
-                </p>
-              )}
-              <p className="text-xs text-gray-400">{channel.subscribers_count} abonnés</p>
+    <div className="min-h-screen dark:bg-black text-black dark:text-white px-4 py-8 ">
+      {/* Bannière */}
+      <div className="relative w-full h-48 sm:h-64 bg-zinc-200 dark:bg-zinc-800 mb-4">
+        {channel.banner_url ? (
+          <Image src={channel.banner_url} alt="Bannière" fill className="object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            Pas de bannière
+          </div>
+        )}
+      </div>
+
+      {/* Infos chaîne sous la bannière */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-zinc-900">
+          {channel.avatar_url ? (
+            <Image src={channel.avatar_url} alt={channel.name} fill className="object-cover" />
+          ) : (
+            <div className="w-full h-full bg-zinc-700 flex items-center justify-center text-white text-xl">
+              {channel.name[0]}
             </div>
-          ))}
+          )}
         </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">{channel.name}</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">@{channel.handle}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {channel.subscribers_count} abonnés
+          </p>
+          {channel.description && (
+            <p className="mt-2 text-gray-700 dark:text-gray-300 max-w-2xl">{channel.description}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Liste des vidéos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {videos.map((video) => (
+          <div key={video.id} className="flex flex-col">
+            {/* Miniature */}
+            <Link
+              href={`/watch/${video.id}`}
+              className="group relative w-full aspect-video bg-zinc-200 dark:bg-zinc-800 rounded-xl overflow-hidden"
+            >
+              {video.thumbnail_url ? (
+                <Image
+                  src={video.thumbnail_url}
+                  alt={video.title}
+                  fill
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                  Pas de miniature
+                </div>
+              )}
+            </Link>
+
+            {/* Infos vidéo */}
+            <div className="flex mt-3 gap-3">
+              {video.channel && (
+                <Link
+                  href={`/channel/${video.channel.handle.replace("@", "")}`}
+                  className="flex-shrink-0"
+                >
+                  <div className="relative w-9 h-9 rounded-full overflow-hidden bg-zinc-700">
+                    {video.channel.avatar_url ? (
+                      <Image
+                        src={video.channel.avatar_url}
+                        alt={video.channel.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-white font-semibold">
+                        {video.channel.name[0]}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )}
+
+              <div className="flex flex-col">
+                <Link
+                  href={`/watch/${video.id}`}
+                  className="font-semibold text-xl text-black dark:text-white line-clamp-2 hover:text-teal-600 transition-colors"
+                >
+                  {video.title}
+                </Link>
+
+                {video.channel && (
+                  <Link
+                    href={`/channel/${video.channel.handle.replace("@", "")}`}
+                    className="text-base text-gray-600 dark:text-gray-400 mt-1 hover:underline"
+                  >
+                    {video.channel.name}
+                  </Link>
+                )}
+
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatViews(video.views_count)} vues
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

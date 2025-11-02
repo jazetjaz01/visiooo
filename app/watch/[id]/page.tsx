@@ -33,11 +33,43 @@ export default function WatchPage() {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fonction utilitaire pour formater les vues
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) {
+      return (views / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+    }
+    if (views >= 1_000) {
+      return (views / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+    }
+    return views.toString();
+  };
+
+  // Incrémenter les vues une seule fois par visiteur
+  const handleView = async () => {
+    if (!video) return;
+
+    const viewedVideos: string[] = JSON.parse(localStorage.getItem("viewedVideos") || "[]");
+
+    if (!viewedVideos.includes(video.id)) {
+      try {
+        await supabase
+          .from("videos")
+          .update({ views_count: (video.views_count || 0) + 1 })
+          .eq("id", video.id);
+
+        setVideo({ ...video, views_count: (video.views_count || 0) + 1 });
+        localStorage.setItem("viewedVideos", JSON.stringify([...viewedVideos, video.id]));
+      } catch (err) {
+        console.error("Erreur compteur de vues :", err);
+      }
+    }
+  };
+
   useEffect(() => {
     async function fetchVideoAndChannel() {
       if (!videoId) return;
 
-      // 1️⃣ Récupération de la vidéo
+      // Récupération de la vidéo
       const { data: videoData, error: videoError } = await supabase
         .from("videos")
         .select("*")
@@ -52,7 +84,7 @@ export default function WatchPage() {
 
       setVideo(videoData);
 
-      // 2️⃣ Récupération de la chaîne associée
+      // Récupération de la chaîne
       if (videoData.channel_id) {
         const { data: channelData, error: channelError } = await supabase
           .from("channels")
@@ -98,17 +130,15 @@ export default function WatchPage() {
             src={video.video_url}
             controls
             className="w-full h-full object-contain"
+            onPlay={handleView}
           />
         </div>
 
         {/* Informations de la vidéo */}
         <div className="mt-4">
           <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <p>
-              {video.views_count} vues •{" "}
-              {new Date(video.created_at).toLocaleDateString()}
-            </p>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {formatViews(video.views_count)} vues
           </div>
         </div>
 
