@@ -8,9 +8,9 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavOpen } from "./nav-open";
-import { NavAccount } from "./nav-account";
-import { NavStudio } from "./nav-studio";
+import { NavOpen } from "../nav-open";
+import { NavAccount } from "../nav-account";
+import { NavStudio } from "../nav-studio";
 
 export function AccountSidebar() {
   const { open, setOpen } = useSidebar();

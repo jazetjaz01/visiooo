@@ -64,7 +64,7 @@ export function AuthButton() {
         type: "user",
         id: user.id,
         name: user.user_metadata?.full_name || user.email,
-        avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
+        avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url || "/default-avatar.png",
       });
     }
     // Rafraîchir la page pour forcer le logout
@@ -93,7 +93,7 @@ export function AuthButton() {
             <span className="text-xs text-gray-500">Profil actif</span>
             <DropdownMenuItem asChild>
               <Link
-                href={profile?.type === "channel" ? `/channel/${profile.handle}` : `/account`}
+                href={profile?.type === "channel" ? `/channel/${profile.handle}` : `/account/profile`}
                 className="mt-1 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-800 px-2 py-1 rounded"
               >
                 <Image
@@ -127,7 +127,7 @@ export function AuthButton() {
                     type: "user",
                     id: user.id,
                     name: user.user_metadata?.full_name || user.email,
-                    avatar_url: user.user_metadata?.avatar_url || "/default-avatar.png",
+                   avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url || "/default-avatar.png",
                   })
                 }
               >

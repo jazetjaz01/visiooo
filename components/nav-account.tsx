@@ -27,7 +27,7 @@ export function NavAccount() {
   const pathname = usePathname();
   const supabase = createClient();
 
-  // Déconnexion
+  // 🔐 Déconnexion
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/auth/login");
@@ -35,7 +35,7 @@ export function NavAccount() {
   };
 
   const accountLinks = [
-    { name: "Profil", url: "/account", icon: User },
+    { name: "Profil", url: "/account/profile", icon: User },
     { name: "Paramètres", url: "/account/settings", icon: Settings },
   ];
 
@@ -47,10 +47,11 @@ export function NavAccount() {
 
       <SidebarMenu>
         {accountLinks.map((item) => {
-          const isActive = pathname === item.url;
+          const isActive = pathname.startsWith(item.url);
 
           return (
             <SidebarMenuItem key={item.name}>
+              {/* Bouton principal */}
               <SidebarMenuButton asChild>
                 <a
                   href={item.url}
@@ -59,46 +60,58 @@ export function NavAccount() {
                     isActive && "font-semibold"
                   )}
                 >
-                  {/* Icône : toujours visible */}
                   <item.icon className="w-5 h-5" />
-
-                  {/* Texte : caché lorsque la sidebar est fermée */}
                   <span className="group-data-[collapsible=icon]:hidden">
                     {item.name}
                   </span>
                 </a>
               </SidebarMenuButton>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
-                    <MoreHorizontal className="w-4 h-4" />
-                    <span className="sr-only">Options</span>
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
+              {/* Menu contextuel */}
+              {item.name === "Profil" && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuAction showOnHover>
+                      <MoreHorizontal className="w-4 h-4" />
+                      <span className="sr-only">Options du profil</span>
+                    </SidebarMenuAction>
+                  </DropdownMenuTrigger>
 
-                <DropdownMenuContent
-                  className="w-48 rounded-lg"
-                  side={isMobile ? "bottom" : "right"}
-                  align={isMobile ? "end" : "start"}
-                >
-                  <DropdownMenuItem>Voir</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Partager</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <DropdownMenuContent
+                    className="w-48 rounded-lg"
+                    side={isMobile ? "bottom" : "right"}
+                    align={isMobile ? "end" : "start"}
+                  >
+                    <DropdownMenuItem
+                      onClick={() => router.push("/account/profile")}
+                    >
+                      Voir le profil
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/account/profile/edit")}
+                    >
+                      Modifier le profil
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </SidebarMenuItem>
           );
         })}
 
-        {/* Déconnexion */}
+        {/* 🔴 Déconnexion */}
         <SidebarMenuItem>
           <SidebarMenuButton
             onClick={handleLogout}
             className="flex items-center gap-2 cursor-pointer hover:bg-destructive/10"
           >
             <LogOut className="w-5 h-5" />
-            <span className="group-data-[collapsible=icon]:hidden">Déconnexion</span>
+            <span className="group-data-[collapsible=icon]:hidden">
+              Déconnexion
+            </span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

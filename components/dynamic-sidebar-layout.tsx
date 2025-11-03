@@ -11,7 +11,7 @@ import {
 
 import Navbar from "@/components/navbar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { AccountSidebar } from "@/components/account-sidebar";
+import { AccountSidebar } from "@/components/account/sidebar";
 import {
   SidebarProvider,
   SidebarInset,
