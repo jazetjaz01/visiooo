@@ -114,54 +114,60 @@ export default function EditProfilePage() {
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "avatar" | "banner") => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
+  if (!e.target.files || e.target.files.length === 0) return;
+  const file = e.target.files[0];
 
-    const previewUrl = URL.createObjectURL(file);
-    if (type === "avatar") setPreviewAvatar(previewUrl);
-    else setPreviewBanner(previewUrl);
+  const previewUrl = URL.createObjectURL(file);
+  if (type === "avatar") setPreviewAvatar(previewUrl);
+  else setPreviewBanner(previewUrl);
 
-    setUploading(true);
+  setUploading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setUploading(false);
-      return router.push("/auth/login");
-    }
-
-    const folder = type === "avatar" ? "avatars" : "banners";
-    const filePath = `${folder}/${user.id}-${Date.now()}-${file.name}`;
-
-    const { error: uploadError } = await supabase.storage.from(folder).upload(filePath, file, { upsert: true });
-    if (uploadError) {
-      alert("Erreur upload : " + uploadError.message);
-      setUploading(false);
-      return;
-    }
-
-    const publicUrl = supabase.storage.from(folder).getPublicUrl(filePath).publicUrl;
-
-    const oldFileUrl = profile[type === "avatar" ? "avatar_url" : "banner_url"];
-    if (oldFileUrl) {
-      const oldFilePath = getPathFromPublicUrl(oldFileUrl, folder);
-      if (oldFilePath) {
-        await supabase.storage.from(folder).remove([oldFilePath]);
-      }
-    }
-
-    await supabase.from("profiles").upsert({
-      id: user.id,
-      [type === "avatar" ? "avatar_url" : "banner_url"]: publicUrl,
-      updated_at: new Date().toISOString(),
-    });
-
-    setProfile((prev) => ({
-      ...prev,
-      [type === "avatar" ? "avatar_url" : "banner_url"]: publicUrl,
-    }));
-
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     setUploading(false);
-  };
+    return router.push("/auth/login");
+  }
+
+  const folder = type === "avatar" ? "avatars" : "banners";
+  const filePath = `${folder}/${user.id}-${Date.now()}-${file.name}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(folder)
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadError) {
+    alert("Erreur upload : " + uploadError.message);
+    setUploading(false);
+    return;
+  }
+
+  // ✅ Correction ici : plus de "error" renvoyé
+  const { data: urlData } = supabase.storage.from(folder).getPublicUrl(filePath);
+  const publicUrl = urlData.publicUrl;
+
+  const oldFileUrl = profile[type === "avatar" ? "avatar_url" : "banner_url"];
+  if (oldFileUrl) {
+    const oldFilePath = getPathFromPublicUrl(oldFileUrl, folder);
+    if (oldFilePath) {
+      await supabase.storage.from(folder).remove([oldFilePath]);
+    }
+  }
+
+  await supabase.from("profiles").upsert({
+    id: user.id,
+    [type === "avatar" ? "avatar_url" : "banner_url"]: publicUrl,
+    updated_at: new Date().toISOString(),
+  });
+
+  setProfile((prev) => ({
+    ...prev,
+    [type === "avatar" ? "avatar_url" : "banner_url"]: publicUrl,
+  }));
+
+  setUploading(false);
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
