@@ -3,17 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import Image from "next/image";
 import Link from "next/link";
 
+
+import { ReportProfileButton } from "@/components/ReportProfileButton";
 export default async function AccountPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/auth/login");
-  }
+  if (!user) redirect("/auth/login");
 
-  // 🧭 Données utilisateur
   const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("id, avatar_url, banner_url, full_name, username, bio")
@@ -24,66 +21,30 @@ export default async function AccountPage() {
 
   const avatar_url = profileData?.avatar_url || "/default-avatar.png";
   const banner_url = profileData?.banner_url || "/default-banner.png";
-  const full_name =
-    profileData?.full_name || user.user_metadata?.full_name || "Utilisateur";
-  const username =
-    profileData?.username ||
-    user.user_metadata?.user_name ||
-    user.user_metadata?.preferred_username ||
-    user.email?.split("@")[0];
-  const bio =
-    profileData?.bio ||
-    user.user_metadata?.bio ||
-    "Aucune bio renseignée pour le moment.";
+  const full_name = profileData?.full_name || user.user_metadata?.full_name || "Utilisateur";
+  const username = profileData?.username || user.user_metadata?.user_name || user.user_metadata?.preferred_username || user.email?.split("@")[0];
+  const bio = profileData?.bio || user.user_metadata?.bio || "Aucune bio renseignée pour le moment.";
 
-  // 🗓️ Date d'inscription
   const createdAt = new Date(user.created_at);
   const mois = createdAt.toLocaleString("fr-FR", { month: "long" });
   const annee = createdAt.getFullYear();
 
-  // 🎥 Dernières vidéos
-  const { data: lastVideos, error: videoError } = await supabase
-    .from("videos")
-    .select("id, title, thumbnail_url, created_at, views_count")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(4);
-
-  if (videoError) console.error("Erreur récupération vidéos :", videoError);
-
-  // 🎥 Nombre total de vidéos
-  const { count: videoCount } = await supabase
-    .from("videos")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id);
-
   return (
     <div className="flex justify-center py-8 px-4 min-h-screen">
       <div className="w-full max-w-5xl rounded-2xl overflow-hidden">
-        {/* 🖼️ Bannière */}
+        {/* Bannière et avatar */}
         <div className="relative h-48 w-full bg-muted overflow-hidden rounded-2xl">
-          <Image
-            src={banner_url}
-            alt="Bannière de profil"
-            fill
-            className="object-cover opacity-90"
-          />
+          <Image src={banner_url} alt="Bannière de profil" fill className="object-cover opacity-90" />
         </div>
-
-        {/* 👤 Avatar + infos utilisateur */}
         <div className="relative px-6 mt-8 flex items-center gap-4 z-10">
           <div className="relative w-36 h-36 rounded-full border-4 border-background overflow-hidden shadow-md">
             <Image src={avatar_url} alt="Avatar" fill className="object-cover" />
           </div>
-
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-semibold">{full_name}</h1>
               {user.id === profileData?.id && (
-                <Link
-                  href="/account/profile/edit"
-                  className="text-teal-600 text-base ml-4 font-semibold hover:underline"
-                >
+                <Link href="/account/profile/edit" className="text-teal-600 text-base ml-4 font-semibold hover:underline">
                   Modifier mon profil
                 </Link>
               )}
@@ -95,57 +56,18 @@ export default async function AccountPage() {
           </div>
         </div>
 
-        {/* 📈 Statistiques */}
-        <div className="flex gap-6 mt-6 px-6">
-          <div>
-            <p className="text-lg font-semibold text-center">12</p>
-            <p className="text-sm text-muted-foreground">Abonnés</p>
-          </div>
-          <div>
-            <p className="text-lg font-semibold text-center">{videoCount ?? 0}</p>
-            <p className="text-sm text-muted-foreground">Vidéos</p>
-          </div>
-        </div>
-
-        {/* 📝 Bio */}
+        {/* Bio */}
         <div className="px-6 mt-8 mb-8">
           <h2 className="text-lg font-semibold mb-2">Bio</h2>
           <p className="text-muted-foreground leading-relaxed">{bio}</p>
         </div>
 
-        {/* 🎬 Dernières vidéos */}
-        <div className="px-6 mb-12">
-          <h2 className="text-lg font-semibold mb-4">Dernières vidéos</h2>
-          {lastVideos && lastVideos.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {lastVideos.map((video) => (
-                <Link
-                  key={video.id}
-                  href={`/watch/${video.id}`}
-                  className="block rounded-xl overflow-hidden border hover:shadow-md transition"
-                >
-                  <div className="relative w-full h-40 bg-gray-200">
-                    <Image
-                      src={video.thumbnail_url || "/default-thumbnail.jpg"}
-                      alt={video.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <h3 className="font-medium text-sm truncate">{video.title}</h3>
-                    <p className="text-xs text-gray-500">
-                      {new Date(video.created_at).toLocaleDateString("fr-FR")} ·{" "}
-                      {video.views_count ?? 0} vues
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">Aucune vidéo publiée pour le moment.</p>
-          )}
-        </div>
+        {/* Bouton signaler si ce n’est pas son propre profil */}
+        {user.id !== profileData?.id && (
+          <div className="px-6 mb-12">
+            <ReportProfileButton profileId={profileData!.id} />
+          </div>
+        )}
       </div>
     </div>
   );
